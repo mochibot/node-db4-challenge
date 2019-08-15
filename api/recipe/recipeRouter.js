@@ -1,6 +1,6 @@
 const express = require('express');
-
 const recipeDB = require('./recipeModel');
+const { checkRecipeInput } = require('../../middlewares');
 
 const router = express.Router();
 
@@ -57,10 +57,53 @@ router.get('/:id/shoppinglist', async (req, res) => {
       res.status(404).json({ message: 'no recipe of this ID exists'});
     }
   } catch (error) {
-    res.status(500).json({ message: error.message})
-    //res.status(500).json({ message: 'error fetching instructions'})
+    res.status(500).json({ message: 'error fetching instructions'});
   }
 })
 
+//add a recipe
+router.post('/', checkRecipeInput, async (req, res) => {
+  const recipe = req.body;
+  try {
+    const newRecipe = await recipeDB.addRecipe(recipe);
+    res.status(201).json(newRecipe);
+  } catch (error) {
+    res.status(500).json({ message: error.message || 'error adding recipe'});
+  }
+})
+
+//update a recipe
+router.put('/:id', checkRecipeInput, async (req, res) => {
+  const id = req.params.id;
+  const recipe = req.body;
+  try {
+    const updatedRecipe = await recipeDB.updateRecipe(id, recipe);
+
+    if (updatedRecipe) {
+      res.status(200).json(updatedRecipe);
+    } else {
+      res.status(404).json({ message: 'no recipe of this ID exists'});
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message || 'error updating recipe'});
+  }
+})
+
+//delete a recipe
+router.delete('/:id', async (req, res) => {
+  const id = req.params.id;
+  try {
+    const toDelete = await recipeDB.getRecipeById(id);
+    const deleted = await recipeDB.deleteRecipe(id)
+
+    if (deleted) {
+      res.status(200).json({removed: toDelete});
+    } else {
+      res.status(404).json({ message: 'no recipe of this ID exists'});
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message || 'error updating recipe'});
+  }
+})
 
 module.exports = router;
