@@ -38,7 +38,7 @@ router.get('/:id/instructions', async (req, res) => {
     if (steps.length) {
       res.status(200).json(steps);
     } else {
-      res.status(404).json({ message: 'no recipe of this ID exists'});
+      res.status(404).json({ message: 'no instruction or recipe of this ID exists'});
     }
   } catch (error) {
     
