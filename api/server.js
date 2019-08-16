@@ -1,8 +1,8 @@
 const express = require('express');
 const helmet = require('helmet');
 
-const recipeRouter = require('./api/recipe/recipeRouter');
-const ingredientRouter = require('./api/ingredient/ingredientRouter');
+const recipeRouter = require('./recipe/recipeRouter');
+const ingredientRouter = require('./ingredient/ingredientRouter');
 
 const server = express();
 

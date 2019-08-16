@@ -92,4 +92,6 @@ router.delete('/:id', async (req, res) => {
   }
 })
 
+//add an ingredient to recipe
+
 module.exports = router;
