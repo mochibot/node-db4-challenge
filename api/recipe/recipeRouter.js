@@ -1,6 +1,7 @@
 const express = require('express');
 const recipeDB = require('./recipeModel');
-const { checkRecipeInput } = require('../../middlewares');
+const ingredientDB = require('../ingredient/ingredientModel');
+const { checkRecipeInput, checkStepInput, checkIngredientInput, checkRecipeIngredientInput } = require('../../middlewares');
 
 const router = express.Router();
 
@@ -105,5 +106,47 @@ router.delete('/:id', async (req, res) => {
     res.status(500).json({ message: error.message || 'error updating recipe'});
   }
 })
+
+//add a step to a recipe
+router.post('/:id/instructions', checkStepInput, async (req, res) => {
+  const id = req.params.id;
+  const step = req.body;
+
+  try {
+    const updatedSteps = await recipeDB.addStepToRecipe(step, id);
+    res.status(201).json(updatedSteps);
+  } catch (error) {
+    res.status(500).json({ message: error.message || 'error adding step to recipe'});
+  }
+})
+
+//add an ingredient to a recipe
+router.post('/:id/shoppinglist', checkRecipeIngredientInput, async (req, res) => {
+  const recipeId = req.params.id;
+  const input = req.body;
+  try {
+    const ingredient = await ingredientDB.getIngredientByName(input.ingredient_name);
+    let newInput = {
+      ingredient_quantity: input.ingredient_quantity,
+      ingredient_unit: input.ingredient_unit
+    }
+
+    if (ingredient) {
+      const newIngredient = await ingredientDB.addIngredientToRecipe(newInput, ingredient.id, recipeId);
+      res.status(201).json(newIngredient);
+    } else {
+      let newIngredientInput = {
+        ingredient_name: input.ingredient_name
+      }
+      const newIngredientId = await ingredientDB.addIngredient(newIngredientInput);
+      const newIngredient = await ingredientDB.addIngredientToRecipe(newInput, newIngredientId.id, recipeId);
+      res.status(201).json(newIngredient);
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message || 'error adding ingredient to recipe'});
+  }
+})
+
+//delete a recipe from 
 
 module.exports = router;

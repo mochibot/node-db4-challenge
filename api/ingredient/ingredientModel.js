@@ -4,10 +4,12 @@ module.exports = {
   getRecipesForIngredient,
   getIngredientById,
   getIngredients,
+  getIngredientByName,
   addIngredient,
   deleteIngredient,
   updateIngredient,
-  addIngredientToRecipe
+  addIngredientToRecipe,
+  deleteIngredientFromRecipe
 };
 
 function getRecipesForIngredient(id) {
@@ -26,21 +28,17 @@ function getIngredients() {
   return db('ingredients');
 };
 
+function getIngredientByName(name) {
+  return db('ingredients').where('ingredient_name', name).first();
+}
+
 function addIngredient(ingredient) {
   return db('ingredients').insert(ingredient).then(id => getIngredientById(id[0]))
 };
 
-function deleteIngredient(id) {
-  return db('ingredients').where({ id }).del();
-};
-
-function updateIngredient(id, changes) {
-  return db('ingredients').where({ id }).update(changes).then(() => getIngredientById(id));
-};
-
-function addIngredientToRecipe(ingredientId, recipeId, ingredient) {
+function addIngredientToRecipe(recipeIngredient, ingredientId, recipeId, ) {
   let newIngredient = {
-    ...ingredient,
+    ...recipeIngredient,
     ingredient_id: ingredientId, 
     recipe_id: recipeId
   };
@@ -49,5 +47,21 @@ function addIngredientToRecipe(ingredientId, recipeId, ingredient) {
 }
 
 function getRecipeIngredient(id) {
-  return db('recipe_ingredients').where({ id }).first();
+  return db('recipe_ingredients').where({ id });
 }
+
+function deleteIngredient(id) {
+  return db('ingredients').where({ id }).del();
+};
+
+function deleteIngredientFromRecipe(recipeId, ingredientId) {
+  return db('recipe_ingredients').where('recipe_id', recipeId).where('ingredient_id', ingredientId).del();
+}
+
+
+function updateIngredient(id, changes) {
+  return db('ingredients').where({ id }).update(changes).then(() => getIngredientById(id));
+};
+
+
+

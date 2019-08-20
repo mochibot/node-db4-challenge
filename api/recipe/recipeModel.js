@@ -7,7 +7,8 @@ module.exports = {
   getInstructions,
   addRecipe,
   deleteRecipe,
-  updateRecipe
+  updateRecipe,
+  addStepToRecipe
 };
 
 function getRecipes() {
@@ -42,3 +43,14 @@ function deleteRecipe(id) {
 function updateRecipe(id, changes) {
   return db('recipes').where({ id}).update(changes).then(() => getRecipeById(id));
 };
+
+function addStepToRecipe(step, recipeId) {
+  let newStep = {
+    ...step, 
+    recipe_id: recipeId
+  }
+
+  return db('steps').insert(newStep).then(() => getInstructions(recipeId));
+}
+
+

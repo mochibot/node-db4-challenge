@@ -10,7 +10,7 @@ router.get('/', async (req, res) => {
     const ingredients = await ingredientDB.getIngredients();
     res.status(200).json(ingredients);
   } catch(error) {
-    res.status(500).json({ message: error.message})
+    res.status(500).json({ message: 'error getting ingredients info' })
   }
 })
 
@@ -27,7 +27,7 @@ router.get('/:id', async (req, res) => {
       res.status(404).json({ message: 'no ingredient of such id exists'})
     }
   } catch(error) {
-    res.status(500).json({ message: error.message })
+    res.status(500).json({ message: 'error getting ingredient info' })
   }
 })
 
@@ -43,18 +43,7 @@ router.get('/:id/recipes', async (req, res) => {
       res.status(404).json({ message: 'ingredient or recipe for such ingredient does not exist'})
     }
   } catch(error) {
-    res.status(500).json({ message: error.message})
-  }
-})
-
-//add an ingredient
-router.post('/', checkIngredientInput, async (req, res) => {
-  const ingredient = req.body;
-  try {
-    const newIngredient = await ingredientDB.addIngredient(ingredient);
-    res.status(201).json(newIngredient);
-  } catch (error) {
-    res.status(500).json({ message: error.message || 'error adding ingredient'});
+    res.status(500).json({ message: 'error getting recipes info' })
   }
 })
 
@@ -92,6 +81,5 @@ router.delete('/:id', async (req, res) => {
   }
 })
 
-//add an ingredient to recipe
 
 module.exports = router;
