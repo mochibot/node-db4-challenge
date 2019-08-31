@@ -9,7 +9,8 @@ module.exports = {
   deleteIngredient,
   updateIngredient,
   addIngredientToRecipe,
-  deleteIngredientFromRecipe
+  deleteIngredientFromRecipe,
+  updateIngredientInRecipe
 };
 
 function getRecipesForIngredient(id) {
@@ -47,7 +48,7 @@ function addIngredientToRecipe(recipeIngredient, ingredientId, recipeId, ) {
 }
 
 function getRecipeIngredient(id) {
-  return db('recipe_ingredients').where({ id });
+  return db('recipe_ingredients').where({ id }).first();
 }
 
 function deleteIngredient(id) {
@@ -63,5 +64,16 @@ function updateIngredient(id, changes) {
   return db('ingredients').where({ id }).update(changes).then(() => getIngredientById(id));
 };
 
+async function updateIngredientInRecipe(recipeId, oldIngredientId, newIngredientId, changes) {
+  changes = {
+    ...changes,
+    ingredient_id: newIngredientId, 
+  };
 
+  await db('recipe_ingredients').where('recipe_id', recipeId).where('ingredient_id', oldIngredientId).update(changes);
+
+  const updateRecipeIngredient = await db('recipe_ingredients').where('recipe_id', recipeId).where('ingredient_id', newIngredientId).first();
+
+  return getRecipeIngredient(updateRecipeIngredient.id);
+}
 
