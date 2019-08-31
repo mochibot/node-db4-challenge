@@ -1,7 +1,7 @@
 const express = require('express');
 const recipeDB = require('./recipeModel');
 const ingredientDB = require('../ingredient/ingredientModel');
-const { checkRecipeInput, checkStepInput, checkIngredientInput, checkRecipeIngredientInput } = require('../../middlewares');
+const { checkRecipeInput, checkStepInput, checkRecipeIngredientInput } = require('../../middlewares');
 
 const router = express.Router();
 
@@ -147,6 +147,69 @@ router.post('/:id/shoppinglist', checkRecipeIngredientInput, async (req, res) =>
   }
 })
 
-//delete a recipe from 
+//delete ingredient from recipe 
+router.delete('/:recipeId/shoppinglist/:ingredientId', async (req, res) => {
+  const recipeId = req.params.recipeId;
+  const ingredientId = req.params.ingredientId;
+
+  try {
+    const recipe = await recipeDB.getRecipeById(recipeId);
+    const ingredient = await ingredientDB.getIngredientById(ingredientId);
+
+    if (recipe) {
+      if (ingredient) {
+        const deleted = await ingredientDB.deleteIngredientFromRecipe(recipeId, ingredientId);
+        res.status(200).json({removed: `${ingredient.ingredient_name} removed from recipe ${recipe.id}`});
+      } else {
+        res.status(404).json({ message: 'no ingredient of this ID exists'});
+      }
+    } else {
+      res.status(404).json({ message: 'no recipe of this ID exists'});
+    } 
+  } catch (error) {
+    res.status(500).json({ message: error.message || 'error deleting ingredient from ingredient'});
+  }
+})
+
+//update ingredient in recipe 
+router.put('/:recipeId/shoppinglist/:ingredientId',  checkRecipeIngredientInput, async (req, res) => {
+  const recipeId = req.params.recipeId;
+  const ingredientId = req.params.ingredientId;
+  const input = req.body;
+
+  try {
+    const recipe = await recipeDB.getRecipeById(recipeId);
+    const currIngredient = await ingredientDB.getIngredientById(ingredientId);
+
+    let newInput = {
+      ingredient_quantity: input.ingredient_quantity,
+      ingredient_unit: input.ingredient_unit
+    }
+
+    const ingredientToUpdate = await ingredientDB.getIngredientByName(input.ingredient_name);
+
+    if (recipe) {
+      if (currIngredient) {
+        if (ingredientToUpdate) {
+          const updatedIngredient = await ingredientDB.updateIngredientInRecipe(recipeId, ingredientId, ingredientToUpdate.id, newInput);
+          res.status(200).json(updatedIngredient);
+        } else {
+          let newIngredientInput = {
+            ingredient_name: input.ingredient_name
+          }
+          const newIngredientId = await ingredientDB.addIngredient(newIngredientInput);
+          const newIngredient = await ingredientDB.addIngredientToRecipe(newInput, newIngredientId.id, recipeId);
+          res.status(201).json(newIngredient);
+        }
+      } else {
+        res.status(404).json({ message: 'no ingredient of this ID exists'});
+      }
+    } else {
+      res.status(404).json({ message: 'no recipe of this ID exists'});
+    } 
+  } catch (error) {
+    res.status(500).json({ message: error.message || 'error deleting ingredient from ingredient'});
+  }
+})
 
 module.exports = router;

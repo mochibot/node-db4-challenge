@@ -29,7 +29,7 @@ function getShoppingList(id) {
   return db('recipe_ingredients as ri')
           .where('ri.recipe_id', id)
           .join('ingredients as i', 'ri.ingredient_id', 'i.id')
-          .select('i.ingredient_name', 'ri.ingredient_quantity', 'ri.ingredient_unit');
+          .select('i.ingredient_name', 'ri.ingredient_quantity', 'ri.ingredient_unit', 'ri.ingredient_id');
 };
 
 function addRecipe(recipe) {
